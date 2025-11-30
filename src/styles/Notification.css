@@ -53,6 +53,13 @@
   overflow: hidden;
   text-shadow: 0 1px 0 rgba(0,0,0,.25);
 }
+.notif-text {
+  order: 2; /* text keyinroq chiqadi */
+}
+
+.notif-icon {
+  order: 1; /* icon birinchi chiqadi */
+}
 .notif:hover{ transform: translateY(-2px); box-shadow: var(--toast-shadow-hover); }
 .notif:active{ transform: translateY(0); }
 
