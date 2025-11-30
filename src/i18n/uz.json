@@ -1,0 +1,13 @@
+{
+  "login": "Kirish",
+  "username": "Login",
+  "password": "Parol",
+  "remember": "Eslab qol",
+  "loading": "Yuklanmoqda…",
+  "google": "Google orqali kirish",
+  "or": "yoki",
+  "hero_title": "Kundalik buyurtmalarni",
+  "hero_title2": "yengil boshqaring",
+  "login_error":"Username va password kerak!",
+  "login_success":"Muvaffaqiyatli tizimga kirildi"
+}

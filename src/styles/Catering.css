@@ -1,0 +1,199 @@
+/* src/pages/caterings.css */
+:root{
+  --brand-50:#ecfdf5;
+  --brand-100:#d1fae5;
+  --brand-200:#a7f3d0;
+  --brand-400:#34d399;
+  --brand-500:#10b981;
+  --brand-600:#059669;
+  --brand-700:#047857;
+  --text-900:#0f172a;
+  --text-700:#334155;
+  --muted:#f3f4f6;
+  --line:#e5e7eb;
+  --card:#ffffff;
+  --shadow: 0 6px 18px rgba(2, 44, 34, .08);
+}
+
+*{box-sizing:border-box}
+
+.cat-page{
+  max-width: 100%;
+  margin: 28px auto;
+  padding: 0 16px 32px;
+}
+
+/* Toolbar */
+.cat-toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 12px;
+  align-items:center;
+  margin-bottom:16px;
+}
+
+.cat-search{
+  position:relative;
+  flex:1 1 320px;
+  min-width:260px;
+  margin-right: 40%;
+}
+.cat-search input{
+  width:100%;
+  padding:10px 12px 10px 36px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+  font-size:14px;
+  color:var(--text-900);
+  outline:none;
+}
+.cat-search input:focus{ box-shadow:0 0 0 3px var(--brand-100); border-color:var(--brand-400); }
+.cat-search-ic{
+  position:absolute; left:10px; top:50%; transform:translateY(-50%);
+  color:#94a3b8; pointer-events:none;
+}
+
+.cat-select{
+  appearance:none;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+  font-size:14px;
+  color:var(--text-700);
+}
+.cat-select:focus{ box-shadow:0 0 0 3px var(--brand-100); border-color:var(--brand-400); }
+
+.cat-check{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 10px; border:1px solid var(--line); border-radius:12px; background:#fff;
+  font-size:14px; color:var(--text-700);
+}
+
+.cat-view{
+  margin-left:auto; display:flex; gap:6px;
+}
+.cat-view button{
+  padding:8px 12px; border:1px solid var(--line); background:#fff; color:var(--text-700);
+  border-radius:10px; font-size:13px; cursor:pointer;
+}
+.cat-view button.is-active{
+  color:#fff; background:var(--brand-600); border-color:var(--brand-600);
+}
+
+/* Grid cards */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* ← bir qatorda 3 ta */
+  gap: 14px;
+}
+
+/* Kichik ekranlarda 1 ta qilib qo'yish (ixtiyoriy) */
+@media (max-width: 860px) {
+  .cat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Karta konteyneri o'zgarishsiz */
+.cat-card{
+  position:relative;
+  display:flex;
+  flex-direction: column;   /* <-- yuqori/ o'rta/ pastki qatorda joylashadi */
+  gap:12px;
+  padding:20px;
+  background:var(--card);
+  border:1px solid #eef2f4;
+  border-radius:18px;
+  box-shadow: var(--shadow);
+}
+
+/* Yangi: yuqori qatordagi nom + rasm yonma-yon */
+.cat-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+/* Nom biroz yirik, sarlavha ko‘rinishi */
+.cat-title{
+  margin:0;
+  font-size:22px;
+  font-weight:800;
+  color:var(--text-900);
+}
+
+/* Rasm (thumb) — o‘ng tomonda kvadrat */
+.cat-logo{
+  flex:0 0 64px;
+  height:64px;
+  border-radius:16px;
+  border:1px solid var(--line);
+}
+
+/* O‘rta qatordagi chiziq: chapda info, o‘ngda holat badge */
+.cat-line{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+/* Qolganlari avvalgidek */
+.cat-fee{ color:#64748b; font-size:15px; }
+.sep-dot{ margin:0 6px; color:#94a3b8; }
+
+.cat-open{
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:14px;
+  font-weight:700;
+}
+.cat-open.on{  background:var(--brand-100); color:var(--brand-700); }
+.cat-open.off{ background:#f1f5f9;   color:#64748b; }
+
+/* Tugma pastda butun kenglik bo‘ylab */
+.cat-viewbtn{
+  width:100%;
+  margin-top:4px;
+  padding:8px 12px;
+  border-radius:14px;
+  border:1px solid var(--brand-600);
+  background:var(--brand-600);
+  color:#fff;
+  font-weight:800;
+  font-size:14px;
+  cursor:pointer;
+}
+.cat-viewbtn:hover{ background:var(--brand-700); border-color:var(--brand-700); }
+
+/* Table view */
+.cat-tablewrap{
+  background:#fff; border:1px solid #eef2f4; border-radius:14px; box-shadow:var(--shadow);
+  overflow:auto;
+}
+.cat-table{
+  width:100%; border-collapse:separate; border-spacing:0;
+}
+.cat-table thead th{
+  text-align:left; font-size:13px; color:#64748b; font-weight:600;
+  padding:12px 14px; border-bottom:1px solid #eef2f4;
+  background:#fcfdfd;
+}
+.cat-table tbody td{
+  padding:12px 14px; border-bottom:1px solid #f3f4f6; font-size:14px; color:#0f172a;
+}
+.td-name{ display:flex; align-items:center; gap:10px; }
+.td-logo{
+  width:28px; height:28px; border-radius:8px; display:grid; place-items:center; color:#fff;
+  background:linear-gradient(135deg,var(--brand-600),var(--brand-400)); font-weight:700;
+}
+.badge{
+  display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px; font-weight:600;
+  background:#eef2f7; color:#334155;
+}
+.badge.green{ background: var(--brand-50); color: var(--brand-700); }
+.badge.gray{ background:#f1f5f9; color:#475569; }

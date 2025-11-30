@@ -1,0 +1,132 @@
+/* Notification.css — drop-in, JS'ni o'zgartirish shart emas */
+
+/* === TEMA VARIABLAR (xohlasa o'zgartir) === */
+:root{
+  --toast-radius: 14px;
+  --toast-gap: 10px;
+  --toast-pad-x: 14px;
+  --toast-pad-y: 12px;
+  --toast-shadow: 0 10px 25px rgba(2,6,23,.20);      /* biroz yumshoqroq */
+  --toast-shadow-hover: 0 14px 34px rgba(2,6,23,.22);
+  --toast-duration: 1.5s;                               /* setTimeout(3000) bilan sinxron */
+
+  /* Ranglar — biroz pastelroq/ochroq */
+  --success-50:#f0fdf4; --success-400:#6ee7b7; --success-600:#10b981; --success-deep:#16a34a;
+  --error-50:#fef2f2;   --error-400:#fca5a5; --error-600:#f87171; --error-deep:#dc2626;
+  --info-50:#eff6ff;    --info-400:#93c5fd; --info-600:#60a5fa; --info-deep:#2563eb;
+}
+
+/* Konteyner — safe-area, mobile ham o'ylangan */
+.notif-container{
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 16px);
+  right: calc(env(safe-area-inset-right, 0px) + 16px);
+  display: grid;
+  gap: var(--toast-gap);
+  z-index: 9999;
+}
+@media (max-width: 640px){
+  .notif-container{ left: 16px; right: 16px; }
+}
+
+/* Toast — shaffof “glass”, gradient va yumshoq soyalar */
+.notif{
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: var(--toast-pad-y) calc(var(--toast-pad-x) + 6px) var(--toast-pad-y) var(--toast-pad-x);
+  border-radius: var(--toast-radius);
+  color: #fff;
+  line-height: 1.35;
+  font-weight: 500;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0))
+    , rgba(17,24,39,.60);            /* biroz ochroq */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--toast-shadow);
+  animation: toast-in .25s ease-out;
+  overflow: hidden;
+  text-shadow: 0 1px 0 rgba(0,0,0,.25);
+}
+.notif:hover{ transform: translateY(-2px); box-shadow: var(--toast-shadow-hover); }
+.notif:active{ transform: translateY(0); }
+
+/* Icon — JS o'zgarmaydi, pseudo-element bilan */
+.notif::before{
+  content: "ℹ";
+  font-size: 14px;
+  display: inline-grid;
+  place-items: center;
+  width: 24px; height: 24px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.15);
+  text-shadow: 0 1px 0 rgba(0,0,0,.3);
+}
+
+/* Turlarga ko'ra ranglar + icon */
+.notif.success{
+  background:
+    linear-gradient(180deg, rgba(16,185,129,.12), rgba(16,185,129,.04))
+    , rgba(22,163,74,.80);            /* ochroq */
+  border-color: rgba(16,185,129,.25);
+}
+.notif.success::before{ content:"✓"; background: rgba(16,185,129,.15); }
+
+.notif.error{
+  background:
+    linear-gradient(180deg, rgba(239,68,68,.12), rgba(239,68,68,.04))
+    , rgba(248,113,113,.80);          /* ochroq */
+  border-color: rgba(239,68,68,.30);
+}
+.notif.error::before{ content:"!"; background: rgba(239,68,68,.15); }
+
+.notif.info{
+  background:
+    linear-gradient(180deg, rgba(59,130,246,.12), rgba(59,130,246,.04))
+    , rgba(96,165,250,.80);           /* ochroq */
+  border-color: rgba(59,130,246,.30);
+}
+.notif.info::before{ content:"i"; background: rgba(59,130,246,.15); }
+
+/* Progress bar — vaqtga sinxron (3s) */
+.notif::after{
+  content:"";
+  position: absolute;
+  left:0; bottom:0;
+  height:3px; width:100%;
+  transform-origin: left;
+  animation: toast-bar var(--toast-duration) linear forwards;
+  opacity:.95;
+  background: rgba(255,255,255,.85);
+}
+.notif.success::after{ background: linear-gradient(90deg, var(--success-50), var(--success-400)); }
+.notif.error::after{   background: linear-gradient(90deg, var(--error-50),   var(--error-400)); }
+.notif.info::after{    background: linear-gradient(90deg, var(--info-50),    var(--info-400)); }
+
+/* Hover qilganda progressni to'xtatib turish */
+.notif:hover::after{ animation-play-state: paused; }
+
+/* Animatsiyalar */
+@keyframes toast-in{
+  from{ opacity:0; transform: translateY(-6px) scale(.98); }
+  to{   opacity:1; transform: translateY(0)    scale(1);   }
+}
+@keyframes toast-bar{
+  from{ transform: scaleX(1); }
+  to{   transform: scaleX(0); }
+}
+
+/* Accessibility: foydalanuvchi animatsiyani yoqtirmasa */
+@media (prefers-reduced-motion: reduce){
+  .notif, .notif::after{ animation: none !important; }
+}
+
+/* Ixtiyoriy pozitsiyalar: .notif-container.bottom-left va h.k. */
+.notif-container.bottom-left{ left:16px; right:auto; bottom:16px; top:auto; }
+.notif-container.top-left{ left:16px; right:auto; }
+.notif-container.bottom-right{ bottom:16px; top:auto; }

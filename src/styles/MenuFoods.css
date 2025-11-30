@@ -1,0 +1,246 @@
+:root{
+  --brand-50:#ecfdf5;
+  --brand-200:#a7f3d0;
+  --brand-400:#34d399;
+  --brand-600:#059669;
+  --brand-700:#047857;
+  --text-900:#0f172a;
+  --text-700:#334155;
+  --line:#e5e7eb;
+  --card:#ffffff;
+  --muted:#f8fafc;
+  --shadow: 0 6px 18px rgba(2, 44, 34, .08);
+}
+
+* { box-sizing: border-box; }
+
+.foods-page{
+  max-width: 100%;
+  margin: 24px auto 28px;
+  padding: 0 16px;
+}
+
+/* Kichik toolbar tartibi */
+.foods-toprow{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+/* Back tugma — bazaviy ko‘rinish */
+.foods-toprow .back-btn{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;              /* ← bu kattalashtirish uchun o‘zgartiriladi */
+  font-size: 14px;                /* ← bu ham */
+  line-height: 1;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text-900);
+  cursor: pointer;
+  transition: box-shadow .12s ease, border-color .12s ease, background .12s ease, transform .06s ease;
+}
+
+.foods-toprow .back-btn:hover{
+  background: var(--muted);
+  box-shadow: 0 0 0 3px var(--brand-50);
+  border-color: var(--brand-400);
+}
+
+.foods-toprow .back-btn:active{
+  transform: translateY(1px);
+}
+
+.foods-toprow .back-btn:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px var(--brand-200);
+  border-color: var(--brand-400);
+}
+
+/* Katta variant (ixtiyoriy) */
+.foods-toprow .back-btn--lg{
+  padding: 10px 16px;    /* kattaroq padding */
+  font-size: 15.5px;     /* kattaroq font */
+  border-radius: 12px;
+}
+
+
+.foods-search{
+  position:relative;
+  flex:1 1 320px;
+  min-width:260px;
+}
+.foods-search input{
+  width:100%;
+  padding:10px 12px 10px 36px; /* icon bilan matn orasida joy */
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+  font-size:14px;
+  color:var(--text-900);
+  outline:none;
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+.foods-search input:focus{
+  box-shadow:0 0 0 3px var(--brand-200);
+  border-color:var(--brand-400);
+}
+.foods-search-ic{
+  position:absolute; left:10px; top:50%; transform:translateY(-50%);
+  color:#94a3b8; pointer-events:none;
+}
+
+.foods-size{
+  display:flex; align-items:center; gap:8px; margin-left:auto;
+  font-size:13px; color:var(--text-700);
+}
+.foods-size select{
+  padding:8px 10px; border:1px solid var(--line); border-radius:10px;
+  background:#fff; color:var(--text-900);
+}
+.foods-size select:focus{
+  box-shadow:0 0 0 3px var(--brand-200);
+  border-color:var(--brand-400);
+}
+
+/* Error / Empty */
+.foods-error{
+  background:#fef2f2; color:#b91c1c;
+  border:1px solid #fecaca; border-radius:12px;
+  padding:10px 12px; margin-bottom:12px;
+  font-size:14px;
+}
+.foods-empty{
+  background:#fff; border:1px dashed var(--line); border-radius:14px;
+  padding:28px; text-align:center; color:#64748b;
+}
+
+/* Grid */
+.foods-grid{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 ta ustun */
+  gap:14px;
+}
+@media (max-width: 1024px){
+  .foods-grid{ grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 860px){
+  .foods-grid{ grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px){
+  .foods-grid{ grid-template-columns: 1fr; }
+}
+
+/* Card */
+.food-card{
+  background:var(--card);
+  border:1px solid #eef2f4;
+  border-radius:14px;
+  box-shadow: var(--shadow);
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+/* Thumb (16:9) */
+.food-thumb{
+  position:relative;
+  width:100%;
+  aspect-ratio: 16 / 9;
+  border-radius:12px;
+  overflow:hidden;
+  background: linear-gradient(135deg, var(--brand-600), var(--brand-400));
+}
+.food-thumb img{
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.food-thumb-ph{
+  width:100%; height:100%;
+  display:grid; place-items:center;
+  color:#fff; font-weight:800; font-size:28px;
+  user-select:none;
+}
+
+/* Body */
+.food-body{ display:flex; flex-direction:column; gap:6px; }
+.food-name{
+  margin:0;
+  font-size:16px;
+  color:var(--text-900);
+  font-weight:600;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.food-desc{
+  margin:0; font-size:13px; color:#64748b;
+  display:-webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow:hidden;
+}
+
+/* Footer */
+.food-foot{
+  margin-top:auto;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px;
+}
+.food-price{
+  font-weight:700; color:var(--text-900);
+}
+.food-btn{
+  padding:8px 12px; border-radius:10px;
+  border:1px solid var(--brand-600);
+  background:var(--brand-600); color:#fff;
+  font-weight:600; font-size:13px; cursor:pointer;
+}
+.food-btn:hover{
+  background:var(--brand-700);
+  border-color:var(--brand-700);
+}
+
+/* Skeleton */
+.skeleton{
+  position:relative; overflow:hidden; min-height:220px;
+  background:#fff; border:1px solid #eef2f4; border-radius:14px;
+}
+.skeleton::after{
+  content:""; position:absolute; inset:0;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%,
+    rgba(2,44,34,.06) 50%, rgba(255,255,255,0) 100%);
+  animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer{
+  0%{ transform: translateX(-100%); }
+  100%{ transform: translateX(100%); }
+}
+
+/* Pager */
+.foods-pager{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:16px;
+  background:#fff; border:1px solid var(--line); border-radius:12px;
+  padding:10px 12px; gap:10px;
+}
+.pg-btn{
+  padding:8px 10px; border-radius:10px; cursor:pointer;
+  background:#fff; border:1px solid var(--line); color:var(--text-900);
+  transition: box-shadow .12s ease, border-color .12s ease, background .12s ease;
+}
+.pg-btn:not(:disabled):hover{
+  box-shadow:0 0 0 3px var(--brand-200);
+  border-color:var(--brand-400);
+  background: var(--muted);
+}
+.pg-btn:disabled{ opacity:.55; cursor:not-allowed; }
+.pg-info{ font-size:13px; color:#64748b; }
+.pg-sep{ margin:0 8px; color:#cbd5e1; }
+
+@media (max-width: 560px){
+  .foods-pager{
+    flex-direction:column;
+    align-items:stretch;
+    text-align:center;
+  }
+}
