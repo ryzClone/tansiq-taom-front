@@ -1,106 +1,94 @@
-/* Notification.css — drop-in, JS'ni o'zgartirish shart emas */
-
-/* === TEMA VARIABLAR (xohlasa o'zgartir) === */
+/* === Minimal, text chapda / icon o‘ngda === */
 :root{
   --toast-radius: 14px;
-  --toast-gap: 10px;
   --toast-pad-x: 14px;
   --toast-pad-y: 12px;
-  --toast-shadow: 0 10px 25px rgba(2,6,23,.20);      /* biroz yumshoqroq */
+  --toast-shadow: 0 10px 25px rgba(2,6,23,.20);
   --toast-shadow-hover: 0 14px 34px rgba(2,6,23,.22);
-  --toast-duration: 1.5s;                               /* setTimeout(3000) bilan sinxron */
+  --toast-duration: 1.5s; /* setTimeout(1500) bilan mos */
 
-  /* Ranglar — biroz pastelroq/ochroq */
-  --success-50:#f0fdf4; --success-400:#6ee7b7; --success-600:#10b981; --success-deep:#16a34a;
-  --error-50:#fef2f2;   --error-400:#fca5a5; --error-600:#f87171; --error-deep:#dc2626;
-  --info-50:#eff6ff;    --info-400:#93c5fd; --info-600:#60a5fa; --info-deep:#2563eb;
+  /* ranglar */
+  --success-50:#f0fdf4; --success-400:#6ee7b7; --success-bg:rgba(22,163,74,.80);
+  --error-50:#fef2f2;   --error-400:#fca5a5;  --error-bg:rgba(248,113,113,.80);
+  --info-50:#eff6ff;    --info-400:#93c5fd;  --info-bg:rgba(96,165,250,.80);
 }
 
-/* Konteyner — safe-area, mobile ham o'ylangan */
+/* Konteyner (o‘ng-ust) */
 .notif-container{
   position: fixed;
   top: calc(env(safe-area-inset-top, 0px) + 16px);
   right: calc(env(safe-area-inset-right, 0px) + 16px);
   display: grid;
-  gap: var(--toast-gap);
+  gap: 10px;
   z-index: 9999;
 }
 @media (max-width: 640px){
   .notif-container{ left: 16px; right: 16px; }
 }
 
-/* Toast — shaffof “glass”, gradient va yumshoq soyalar */
+/* Toast */
 .notif{
   position: relative;
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
+  display: flex;
   align-items: center;
-  gap: 12px;
-  padding: var(--toast-pad-y) calc(var(--toast-pad-x) + 6px) var(--toast-pad-y) var(--toast-pad-x);
+  padding: var(--toast-pad-y) calc(var(--toast-pad-x) + 32px) var(--toast-pad-y) var(--toast-pad-x); /* o‘ngda icon uchun joy */
   border-radius: var(--toast-radius);
   color: #fff;
   line-height: 1.35;
   font-weight: 500;
   border: 1px solid transparent;
   background:
-    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0))
-    , rgba(17,24,39,.60);            /* biroz ochroq */
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0)),
+    rgba(17,24,39,.60);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: var(--toast-shadow);
   animation: toast-in .25s ease-out;
-  overflow: hidden;
   text-shadow: 0 1px 0 rgba(0,0,0,.25);
 }
-.notif-text {
-  order: 2; /* text keyinroq chiqadi */
-}
-
-.notif-icon {
-  order: 1; /* icon birinchi chiqadi */
-}
 .notif:hover{ transform: translateY(-2px); box-shadow: var(--toast-shadow-hover); }
-.notif:active{ transform: translateY(0); }
 
-/* Icon — JS o'zgarmaydi, pseudo-element bilan */
+/* Icon — O‘NG tomonda */
 .notif::before{
   content: "ℹ";
-  font-size: 14px;
-  display: inline-grid;
-  place-items: center;
+  position: absolute;
+  right: var(--toast-pad-x);
+  top: 50%;
+  transform: translateY(-50%);
   width: 24px; height: 24px;
+  display: grid; place-items: center;
   border-radius: 999px;
   background: rgba(255,255,255,.15);
   text-shadow: 0 1px 0 rgba(0,0,0,.3);
+  font-size: 14px;
 }
 
-/* Turlarga ko'ra ranglar + icon */
+/* Turlar */
 .notif.success{
   background:
-    linear-gradient(180deg, rgba(16,185,129,.12), rgba(16,185,129,.04))
-    , rgba(22,163,74,.80);            /* ochroq */
+    linear-gradient(180deg, rgba(16,185,129,.12), rgba(16,185,129,.04)),
+    var(--success-bg);
   border-color: rgba(16,185,129,.25);
 }
 .notif.success::before{ content:"✓"; background: rgba(16,185,129,.15); }
 
 .notif.error{
   background:
-    linear-gradient(180deg, rgba(239,68,68,.12), rgba(239,68,68,.04))
-    , rgba(248,113,113,.80);          /* ochroq */
+    linear-gradient(180deg, rgba(239,68,68,.12), rgba(239,68,68,.04)),
+    var(--error-bg);
   border-color: rgba(239,68,68,.30);
 }
 .notif.error::before{ content:"!"; background: rgba(239,68,68,.15); }
 
 .notif.info{
   background:
-    linear-gradient(180deg, rgba(59,130,246,.12), rgba(59,130,246,.04))
-    , rgba(96,165,250,.80);           /* ochroq */
+    linear-gradient(180deg, rgba(59,130,246,.12), rgba(59,130,246,.04)),
+    var(--info-bg);
   border-color: rgba(59,130,246,.30);
 }
 .notif.info::before{ content:"i"; background: rgba(59,130,246,.15); }
 
-/* Progress bar — vaqtga sinxron (3s) */
+/* Progress bar (1.5s) */
 .notif::after{
   content:"";
   position: absolute;
@@ -108,14 +96,13 @@
   height:3px; width:100%;
   transform-origin: left;
   animation: toast-bar var(--toast-duration) linear forwards;
-  opacity:.95;
-  background: rgba(255,255,255,.85);
+  opacity:.95; background: rgba(255,255,255,.85);
 }
 .notif.success::after{ background: linear-gradient(90deg, var(--success-50), var(--success-400)); }
 .notif.error::after{   background: linear-gradient(90deg, var(--error-50),   var(--error-400)); }
 .notif.info::after{    background: linear-gradient(90deg, var(--info-50),    var(--info-400)); }
 
-/* Hover qilganda progressni to'xtatib turish */
+/* Hoverda progressni pauza */
 .notif:hover::after{ animation-play-state: paused; }
 
 /* Animatsiyalar */
@@ -128,12 +115,7 @@
   to{   transform: scaleX(0); }
 }
 
-/* Accessibility: foydalanuvchi animatsiyani yoqtirmasa */
+/* Reduce motion */
 @media (prefers-reduced-motion: reduce){
   .notif, .notif::after{ animation: none !important; }
 }
-
-/* Ixtiyoriy pozitsiyalar: .notif-container.bottom-left va h.k. */
-.notif-container.bottom-left{ left:16px; right:auto; bottom:16px; top:auto; }
-.notif-container.top-left{ left:16px; right:auto; }
-.notif-container.bottom-right{ bottom:16px; top:auto; }

@@ -4,8 +4,6 @@ import {
   Routes,
   Route,
   Navigate,
-  Outlet,
-  useLocation,
 } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -13,7 +11,6 @@ import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Orders from "./pages/Orders";
-import Notifications from "./pages/Notifications";
 import Catering from "./pages/Catering";
 import Shoping from "./pages/Shoping";
 import Help from "./pages/Help";
@@ -96,7 +93,6 @@ export default function App() {
               <Route path="shoping" element={<Shoping />} />
               <Route path="cart" element={<Cart />} />
               <Route path="orders" element={<Orders />} />
-              <Route path="notifications" element={<Notifications />} />
               <Route path="help" element={<Help />} />
             </Route>
           {/* </Route> */}

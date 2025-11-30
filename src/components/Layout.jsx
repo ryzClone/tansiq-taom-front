@@ -48,7 +48,6 @@ export default function Layout() {
       { href: "/catering",      label: "Kateringlar",      emoji: "🏢" },
       { href: "/cart",          label: "Savatcha",         emoji: "🛒", badge: count, total },
       { href: "/orders",        label: "Buyurtmalar",      emoji: "📦" },
-      { href: "/notifications", label: "Bildirishnomalar", emoji: "🔔", badge: notifCount },
       { href: "/help",          label: "Yordam",           emoji: "❓" },
     ],
     [count, total, notifCount] // ← muhim
