@@ -1,138 +1,197 @@
-:root {
-  --brand-600: #059669;
-  --brand-700: #047857;
-  --line: #e5e7eb;
-  --muted: #f8fafc;
-  --text: #0f172a;
+:root{
+  --brand-600:#059669;
+  --brand-700:#047857;
+  --line:#e5e7eb;
+  --muted:#f8fafc;
+  --text:#0f172a;
 }
 
-.cart-page {
+.cart-page{
+  position: relative;
   max-width: 900px;
-  margin: 24px auto;
-  padding: 0 16px;
+  margin:24px auto;
+  padding:0 16px;
 }
 
-.cart-top {
+/* ‼️ Yangi TOP — back o‘ngda */
+.cart-top.new-top{
+  display:flex;
+  align-items:center;
+  gap: 20px;
+  margin-bottom:20px;
+}
+
+.back-right{
+  right:0;
+  top:0;
+  position:relative;
+}
+
+.back-btn{
+  border:1px solid var(--line);
+  background:#fff;
+  padding:6px 12px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.cart-title{
+  margin:0;
+  font-size:22px;
+  font-weight:800;
+  color:var(--text);
+}
+
+/* Empty */
+.cart-empty{
+  border:1px dashed var(--line);
+  border-radius:14px;
+  padding:24px;
+  text-align:center;
+  color:#64748b;
+  background:#fff;
+}
+
+/* List */
+.cart-list{
+  display:grid;
+  gap:12px;
+}
+.cart-item{
+  display:grid;
+  grid-template-columns: 72px 1fr auto;
+  align-items:center;
+  gap:12px;
+  background:#fff;
+  border:1px solid #eef2f4;
+  border-radius:14px;
+  padding:12px;
+}
+.cart-thumb img{
+  width:72px; height:72px; object-fit:cover; border-radius:10px;
+}
+.cart-thumb-ph{
+  width:72px; height:72px; border-radius:10px;
+  display:grid; place-items:center;
+  background:var(--muted); color:#475569; font-weight:700;
+}
+.cart-name{ font-weight:700; font-size:16px; color: var(--text); }
+
+.cart-desc{
+  color:#64748b;
+  font-size:13px;
+  margin-top:2px;
+}
+
+/* ‼️ Yangi: item pastida narx */
+.cart-price-row{
+  margin-top:10px;
+  font-size:15px;
+  font-weight:700;
+  color:#0f172a;
+}
+
+/* Controls wrapper */
+.cart-ctrls.new-ctrls {
   display: flex;
+  flex-direction: column; /* pastga narx chiqishi uchun */
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 6px;
 }
 
-.back-btn {
-  border: 1px solid var(--line);
-  background: #fff;
-  padding: 6px 10px;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.cart-title {
-  margin: 0;
-  font-size: 20px;
-}
-
-.cart-empty {
-  border: 1px dashed var(--line);
-  border-radius: 14px;
-  padding: 24px;
-  text-align: center;
-  color: #64748b;
-  background: #fff;
-}
-
-.cart-list {
-  display: grid;
-  gap: 12px;
-}
-
-.cart-item {
-  display: grid;
-  grid-template-columns: 64px 1fr auto;
+/* Controls wrapper */
+.cart-ctrls.new-ctrls {
+  display: flex;
+  flex-direction: column; /* pastga narx chiqishi uchun */
   align-items: center;
-  gap: 12px;
-  background: #fff;
-  border: 1px solid #eef2f4;
-  border-radius: 14px;
-  padding: 12px;
+  gap: 8px;
 }
 
-.cart-thumb img {
-  width: 64px;
-  height: 64px;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-.cart-thumb-ph {
-  width: 64px;
-  height: 64px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  background: var(--muted);
-  color: #475569;
-  font-weight: 700;
-}
-
-.cart-name {
-  font-weight: 600;
-}
-
-.cart-desc {
-  color: #64748b;
-  font-size: 13px;
-  margin-top: 2px;
-}
-
-.cart-price {
-  margin-top: 6px;
-  font-weight: 600;
-}
-
-.cart-ctrls {
+/* Tugmalar + O'chirish yonma-yon */
+.cart-ctrls-body {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
+/* Qty panel */
 .qty {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 4px 8px;
+  border-radius: 12px;
+  padding: 0;
+  background: #fff;
+  overflow: hidden;
 }
 
+/* Minus/Plus tugmalari */
 .qty button {
+  width: 36px;
+  height: 36px;
   border: none;
   background: #fff;
-  cursor: pointer;
-}
-
-.qty span {
-  min-width: 24px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 16px;
-  /* kattaroq qilib ko'rsatish */
-}
-
-.cart-summary .total {
   font-size: 18px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.rmv {
-  border: 1px solid var(--line);
-  background: #fff;
-  padding: 6px 10px;
-  border-radius: 10px;
   cursor: pointer;
+  transition: 0.1s ease;
 }
 
+.qty button:hover {
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+  border-color: var(--brand-600);
+}
+
+.qty button:active {
+  transform: translateY(1px);
+}
+
+/* Qty number */
+.qty span {
+  display: inline-block;
+  min-width: 36px; /* tugmalar bilan bir xil height */
+  text-align: center;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 36px; /* vertikal markazlashtirish */
+}
+
+/* O‘chirish tugmasi */
+.rmv {
+  height: 36px; /* tugmalar bilan bir xil balandlik */
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: #ef4444;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.1s ease;
+}
+
+.rmv:hover {
+  background: #fff5f5;
+  border-color: #fca5a5;
+}
+
+/* Narx pastda alohida blok */
+.cart-price-row {
+  margin-top: 6px;
+  padding: 4px 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f8fafc;
+  min-width: 80px; /* minimal kenglik */
+}
+
+/* Summary */
 .cart-summary {
   margin-top: 16px;
   display: flex;
@@ -144,6 +203,12 @@
   padding: 12px;
 }
 
+.total {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
 .actions {
   display: flex;
   gap: 10px;
@@ -152,18 +217,20 @@
 .actions .ghost {
   border: 1px solid var(--line);
   background: #fff;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: 10px;
   cursor: pointer;
+  font-weight: 600;
 }
 
 .actions .primary {
   border: 1px solid var(--brand-600);
   background: var(--brand-600);
   color: #fff;
-  padding: 8px 14px;
+  padding: 10px 16px;
   border-radius: 10px;
   cursor: pointer;
+  font-weight: 600;
 }
 
 .actions .primary:hover {

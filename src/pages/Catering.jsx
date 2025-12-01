@@ -1,27 +1,34 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Catering.css";
+import Select from "react-select";
 
 export default function Caterings() {
   const navigate = useNavigate();
+  const [selected, setSelected] = useState([]);
   // UI states
   const [query, setQuery] = useState("");
   const [openOnly, setOpenOnly] = useState(false);
-  const [sort, setSort] = useState("top"); // UI sort (client-side)
+  const [sort, setSort] = useState("top");
   const [view, setView] = useState("cards");
 
-  // Pagination for API
+  // Pagination (infinite)
   const [page, setPage] = useState(0);
-  const [size] = useState(12);
-  const apiSort = ["name,asc"]; // <-- backendga ketadigan sort massiv (kerak bo'lsa o'zgartirasiz)
+  const size = 9;
+  const apiSort = ["name,asc"];
+
   const API_BASE = process.env.REACT_APP_API;
+
   // Data
   const [items, setItems] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
-  
-  // ==== FETCH /organization/list?pageable.page=&pageable.size=&pageable.sort=
+
+  // Sentinel for infinite scroll
+  const loadMoreRef = useRef(null);
+
+  // === FETCH: /organization/list?pageable.page=&pageable.size=&pageable.sort=
   useEffect(() => {
     let cancelled = false;
 
@@ -34,12 +41,10 @@ export default function Caterings() {
         params.set("pageable.page", String(page));
         params.set("pageable.size", String(size));
         apiSort.forEach((s) => params.append("pageable.sort", s));
-
-        // Agar backendda search object kerak bo'lsa, qo'shish mumkin:
+        // Agar serverda qidiruv bo‘lsa, qo‘shing:
         // params.set("search.search", query || "");
 
         const url = `${API_BASE}/organization/list?${params.toString()}`;
-
         const res = await fetch(url, {
           headers: { Accept: "application/json" },
         });
@@ -47,11 +52,9 @@ export default function Caterings() {
 
         const json = await res.json();
         const content = Array.isArray(json?.content) ? json.content : [];
-        
 
-        // Backend maydonlarini karta ko‘rinishiga moslab map qilamiz
         const mapped = content.map((o, i) => ({
-          id: o.id ?? o.uuid ?? i + 1,
+          id: o.id ?? o.uuid ?? `${page}-${i}`,
           name: o.name ?? "—",
           openTime: o.openTime ?? "09:00",
           closeTime: o.closeTime ?? "18:00",
@@ -64,10 +67,11 @@ export default function Caterings() {
           logoUrl: o.attachmentUrl,
         }));
 
-        if (!cancelled) {
-          setItems(mapped);
-          setTotalPages(Number(json?.page?.totalPages) || 1);
-        }
+        if (cancelled) return;
+
+        // append / replace
+        setItems((prev) => (page === 0 ? mapped : [...prev, ...mapped]));
+        setTotalPages(Number(json?.page?.totalPages) || 1);
       } catch (e) {
         if (!cancelled) setErr(e?.message || "Yuklab bo‘lmadi");
       } finally {
@@ -79,11 +83,34 @@ export default function Caterings() {
     return () => {
       cancelled = true;
     };
-  }, [page, size]); // (query ni serverga yubormayotgan bo'lsak, dependencyga qo'shmaymiz)
+  }, [API_BASE, page, size]);
 
-  // Client-side filter/sort (faqat UI uchun)
+  // IntersectionObserver — sentinel ko‘ringanda navbatdagi sahifa
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+
+    const onIntersect = (entries) => {
+      const [entry] = entries;
+      const hasMore = page + 1 < totalPages;
+      if (entry.isIntersecting && hasMore && !loading) {
+        setPage((p) => p + 1);
+      }
+    };
+
+    const obs = new IntersectionObserver(onIntersect, {
+      root: null,
+      rootMargin: "200px", // oldindan yuklab boradi
+      threshold: 0,
+    });
+
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [page, totalPages, loading]);
+
+  // Client-side filter/sort
   const filtered = useMemo(() => {
-    let list = items.slice();
+    let list = items;
 
     if (query.trim()) {
       const q = query.toLowerCase();
@@ -91,13 +118,44 @@ export default function Caterings() {
     }
     if (openOnly) list = list.filter((c) => c.open);
 
-    if (sort === "az") list.sort((a, b) => a.name.localeCompare(b.name));
-    if (sort === "top") list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    if (sort === "az")
+      list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+    // "top" uchun serverdan rating kelmayapti — o‘zgarishsiz qoldiramiz
 
     return list;
   }, [items, query, openOnly, sort]);
 
-  const goMenus = (cateringId) => navigate(`/catering/${cateringId}/menus`);
+    
+    const options = filtered.map((c) => ({      
+      value: c.id,   
+      label: c.name
+    }));
+
+  const goMenus = (cateringId) => navigate(`/food/by-organization/${cateringId}`);
+
+  const initialLoading = loading && page === 0 && items.length === 0;
+  const hasMore = page + 1 < totalPages;
+
+  const handleChange = (value) => {
+    setSelected(value);
+
+    // Backendga yuborish
+    // value: [{value,label}, ...] => server uchun array of values
+    const payload = value.map((v) => v.value);
+
+    fetch(API_BASE, {
+      method: "POST", // yoki PUT
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ selected: payload }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Backend response:", data);
+      })
+      .catch((err) => console.error(err));
+  };
 
   return (
     <div className="cat-page">
@@ -109,11 +167,23 @@ export default function Caterings() {
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
-              setPage(0); // qidiruv o'zgarsa 1-sahifaga qaytamiz (agar keyin serverga ham yuborsangiz, effectga qo'shasiz)
+              // faqat client-side qidiruv — listni saqlaymiz, sahifani reset qilamiz
+              setPage(0);
+              setItems([]); // 0-sahifani qayta olish uchun tozalaymiz (aks holda append bo‘lishi mumkin)
             }}
             placeholder="Katering yoki oshxona…"
           />
         </div>
+
+        <Select
+          isMulti
+          options={options}
+          value={selected}
+          onChange={handleChange}
+          className="basic-multi-select"
+          classNamePrefix="select"
+          placeholder="Texnikani tanlang..."
+        />
 
         <div className="cat-view">
           <button
@@ -125,58 +195,71 @@ export default function Caterings() {
         </div>
       </div>
 
-      {err && <div style={{ color: "#b91c1c", marginBottom: 12 }}>Xatolik: {err}</div>}
+      {err && (
+        <div style={{ color: "#b91c1c", marginBottom: 12 }}>Xatolik: {err}</div>
+      )}
 
-      {loading ? (
+      {/* Grid */}
+      {initialLoading ? (
         <div className="cat-grid">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="cat-card skeleton" />
           ))}
         </div>
       ) : (
-        <div className="cat-grid">
-          {filtered.map((c) => (
-            <article key={c.id} className="cat-card">
-              <div className="cat-head">
-                <h3 className="cat-title">{c.name}</h3>
-                <img src={c.logoUrl} alt="" className="cat-logo" />
-              </div>
-
-              <div className="cat-line">
-                <div className="cat-fee">
-                  <span className="eta">
-                    {c.openTime} – {c.closeTime}
-                  </span>
+        <>
+          <div className="cat-grid">
+            {filtered.map((c) => (
+              <article key={c.id} className="cat-card">
+                <div className="cat-head">
+                  <h3 className="cat-title">{c.name}</h3>
+                  {c.logoUrl ? (
+                    <img src={c.logoUrl} alt="" className="cat-logo" />
+                  ) : (
+                    <div className="cat-logo" aria-hidden />
+                  )}
                 </div>
-                <div className={`cat-open ${c.open ? "on" : "off"}`}>
-                  {c.open ? "Hozir ochiq" : "Hozir yopiq"}
-                </div>
-              </div>
 
-              <button className="cat-viewbtn" onClick={() => goMenus(c.id)}>
-                Menyuni ko'rish
-              </button>
-            </article>
-          ))}
-        </div>
+                <div className="cat-line">
+                  <div className="cat-fee">
+                    <span className="eta">
+                      {c.openTime?.slice(0, 5)} - {c.closeTime?.slice(0, 5)}
+                    </span>
+                  </div>
+
+                  {/* Active dot (matnsiz) */}
+                  <div className={`cat-open ${c.open ? "on" : "off"}`}>
+                    <span
+                      className="status-icon"
+                      title={c.open ? "Active" : "Inactive"}
+                    />
+                  </div>
+                </div>
+
+                <button className="cat-viewbtn" onClick={() => goMenus(c.id)}>
+                  Menyuni ko'rish
+                </button>
+              </article>
+            ))}
+          </div>
+
+          {/* Infinite scroll sentinel */}
+          <div ref={loadMoreRef} style={{ height: 48 }} />
+
+          {/* “Yuklanmoqda…” indikator (faqat keyingi sahifalarda) */}
+          {loading && page > 0 && (
+            <div style={{ textAlign: "center", padding: 12, color: "#64748b" }}>
+              Yuklanmoqda…
+            </div>
+          )}
+
+          {/* {!hasMore && !loading && filtered.length > 0 && (
+            <div style={{ textAlign: "center", padding: 10, color: "#94a3b8" }}>
+              Natijalar tugadi
+            </div>
+          )} */}
+        </>
       )}
-
-      {/* Pager */}
-      <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 16 }}>
-        <button className="pg-btn" disabled={page <= 0} onClick={() => setPage((p) => p - 1)}>
-          ⟨ Oldingi
-        </button>
-        <div className="pg-info">
-          Sahifa {page + 1} / {Math.max(1, totalPages)}
-        </div>
-        <button
-          className="pg-btn"
-          disabled={page + 1 >= totalPages}
-          onClick={() => setPage((p) => p + 1)}
-        >
-          Keyingi ⟩
-        </button>
-      </div>
     </div>
   );
 }

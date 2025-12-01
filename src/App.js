@@ -14,7 +14,6 @@ import Orders from "./pages/Orders";
 import Catering from "./pages/Catering";
 import Shoping from "./pages/Shoping";
 import Help from "./pages/Help";
-import Menus from "./pages/Menu";
 import MenuFoods from "./pages/MenuFoods";
 import Cart from "./pages/Cart";
 import { CartProvider } from "./context/CartContext";
@@ -85,9 +84,8 @@ export default function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<Dashboard />} />
               <Route path="catering" element={<Catering />} />
-              <Route path="catering/:cateringId/menus" element={<Menus />} />
               <Route
-                path="catering/:cateringId/menus/:menuId/foods"
+                path="food/by-organization/:cateringId"
                 element={<MenuFoods />}
               />
               <Route path="shoping" element={<Shoping />} />

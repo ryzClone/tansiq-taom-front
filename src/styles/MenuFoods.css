@@ -121,7 +121,7 @@
 /* Grid */
 .foods-grid{
   display:grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 ta ustun */
+  grid-template-columns: repeat(3, 1fr); /* 4 ta ustun */
   gap:14px;
 }
 @media (max-width: 1024px){
@@ -183,7 +183,9 @@
 /* Footer */
 .food-foot{
   margin-top:auto;
-  display:flex; align-items:center; justify-content:space-between;
+  display:flex; 
+  flex-direction: column;
+  align-items: flex-start;
   gap:10px;
 }
 .food-price{
@@ -244,3 +246,177 @@
     text-align:center;
   }
 }
+
+
+/* Top bar’dagi yashil korzinka tugma */
+.cart-cta{
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--brand-600, #059669);
+  background: var(--brand-600, #059669);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(5,150,105,.25);
+}
+.cart-cta:hover{
+  background: var(--brand-700, #047857);
+  border-color: var(--brand-700, #047857);
+}
+.cart-cta .ic{ font-size: 16px; line-height: 1; }
+.cart-cta .sum{ font-size: 14px; }
+
+/* Kartadagi uzun - qty + */
+.food-long{
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border: 1px solid var(--brand-600, #059669);
+  background: var(--brand-600, #059669);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.food-long .btn-minus,
+.food-long .btn-plus{
+  flex: 0 0 20%;
+  padding: 5px 12px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+}
+.food-long .btn-minus:disabled{
+  opacity: .5;
+  cursor: not-allowed;
+}
+.food-long .qty-val{
+  flex: 1 1 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,.14);
+  color: #fff;
+  font-weight: 700;
+}
+
+
+/* ===== MODAL BACKDROP ===== */
+.mf-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.0.1);
+  backdrop-filter: blur(1px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+/* ===== MODAL BOX ===== */
+.mf-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+  position: relative;
+  animation: pop .25s ease;
+}
+@keyframes pop {
+  from { transform: scale(.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Close button */
+.mf-close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  border: none;
+  background: transparent;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+/* Image */
+.mf-img {
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.mf-img img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+}
+
+/* Title */
+.mf-title {
+  font-size: 22px;
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+
+/* Description */
+.mf-desc {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+/* Bottom row: price + qty */
+.mf-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+/* Price */
+.mf-price {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* Qty control */
+.mf-qty {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--brand-600);
+}
+.mf-qty button {
+  flex:1 1 20%;
+  border: none;
+  background: transparent;
+  padding: 10px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+}
+.mf-qty span {
+  flex:1 1 60%;
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.mf-qty button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+
