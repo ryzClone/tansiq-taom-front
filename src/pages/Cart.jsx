@@ -1,26 +1,13 @@
-// src/pages/Cart.jsx
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import "../styles/Cart.css";
 
-const fmt = (n) => `${Number(n || 0).toLocaleString("uz-UZ")} so‘m`;
+const fmt = (n) => `${Number(n||0).toLocaleString("uz-UZ")} so‘m`;
 
 export default function Cart() {
   const nav = useNavigate();
-  const { items, inc, dec, remove, clear, total } = useCart();
+  const { items, inc, dec, removeAllSame, clear, total } = useCart();
 
-  // src/context/CartContext.jsx
-function removeAllSame(targetItem) {
-  setItems(prevItems =>
-    prevItems.filter(
-      item =>
-        !(item.foodName === targetItem.foodName && Number(item.price) === Number(targetItem.price))
-    )
-  );
-}
-
-
-  // Hamkor nomi (organization)
   const partner =
     items?.find((x) => x.cateringName || x.organizationName || x.partnerName)
       ?.cateringName ||
@@ -30,8 +17,6 @@ function removeAllSame(targetItem) {
 
   return (
     <div className="cart-page">
-
-      {/* Tepa panel — orqaga tugma o‘ng tomonda */}
       <div className="cart-top new-top">
         <button
           className="back-btn back-btn--float back-right"
@@ -42,8 +27,6 @@ function removeAllSame(targetItem) {
         <h1 className="cart-title">
           Savatcha {partner ? `— ${partner}` : ""}
         </h1>
-
-
       </div>
 
       {!items.length ? (
@@ -52,8 +35,7 @@ function removeAllSame(targetItem) {
         <>
           <div className="cart-list">
             {items.map((it) => {
-              const lineTotal =
-                (Number(it.qty) || 0) * (Number(it.price) || 0);
+              const lineTotal = Number(it.price) * Number(it.qty);
 
               return (
                 <article key={it.key} className="cart-item">
@@ -69,25 +51,22 @@ function removeAllSame(targetItem) {
 
                   <div className="cart-body">
                     <div className="cart-name">{it.foodName}</div>
-
                     {it.description && (
                       <div className="cart-desc">{it.description}</div>
                     )}
-
                   </div>
 
                   <div className="cart-ctrls new-ctrls">
                     <div className="cart-ctrls-body">
                       <div className="qty qty-lg">
-                      <button onClick={() => dec(it.key)}>−</button>
-                      <span>{it.qty}</span>
-                      <button onClick={() => inc(it.key)}>+</button>
+                        <button onClick={() => dec(it.key)}>−</button>
+                        <span>{it.qty}</span>
+                        <button onClick={() => inc(it.key)}>+</button>
+                      </div>
+                      <button className="rmv" onClick={() => removeAllSame(it)}>
+                        O‘chirish
+                      </button>
                     </div>
-                                        <button className="rmv" onClick={() => removeAllSame(it.key)}>
-                      O‘chirish
-                    </button>
-                    </div>
-                                        {/* Narx — itemning past qismiga qo‘ydik */}
                     <div className="cart-price-row">
                       Narx: <strong>{fmt(lineTotal)}</strong>
                     </div>
