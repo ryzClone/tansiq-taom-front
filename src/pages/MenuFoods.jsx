@@ -11,7 +11,7 @@ const API_BASE = process.env.REACT_APP_API || import.meta?.env?.VITE_API || "";
 // Rasm URL yig‘ish
 const getImgUrl = (attachmentUrl) => {
   if (!attachmentUrl) return null;
-  if (attachmentUrl.startsWith("http")) return attachmentUrl;
+  if (String(attachmentUrl).startsWith("http")) return attachmentUrl;
   return `${API_BASE}/attachments/${attachmentUrl}`;
 };
 
@@ -27,21 +27,28 @@ const getFoodKey = (f) => {
   return `org:${org}:${idOrName}`;
 };
 
-// 🧠 Cart ichida bor itemlar bir xil orgId’danmi?
-const isDifferentOrganizationInCart = (cartItems, newOrgIdLike) => {
-  const wanted = String(newOrgIdLike ?? "");
-  if (!cartItems?.length) return false;
-  // faqat organizationId (yoki eski ma'lumotlarda cateringId) ni solishtiramiz
-  return cartItems.some((it) => String(it.organizationId ?? it.cateringId ?? "") !== wanted);
-};
-
 export default function MenuFoods() {
   const navigate = useNavigate();
-  const { cateringId } = useParams();   // backend list org bo‘yicha keladi
+  const { cateringId } = useParams(); // backend list org bo‘yicha keladi
 
   // Cart & Notification
   const { items: cartItems, add, remove, clear, total } = useCart();
   const { addNotification } = useNotification();
+
+  // 🧭 Savatchadagi joriy organizationId ni jonli saqlash (double-clickda duplicated toast chiqmasin)
+  const cartOrgRef = useRef("");
+
+  // cartItems o‘zgarganda ref’ni sync qilamiz
+  useEffect(() => {
+    if (cartItems.length) {
+      const org = String(
+        cartItems[0].organizationId ?? cartItems[0].cateringId ?? ""
+      );
+      cartOrgRef.current = org;
+    } else {
+      cartOrgRef.current = "";
+    }
+  }, [cartItems]);
 
   // Infinite scroll holati
   const [items, setItems] = useState([]);
@@ -151,16 +158,20 @@ export default function MenuFoods() {
     return found ? Number(found.qty || 0) : 0;
   };
 
-  // ++ tugma (agar cart boshqa org’dan bo‘lsa — avval tozalaymiz)
+  // ++ tugma (agar cart boshqa org’dan bo‘lsa — avval tozalaymiz, ref’ni ham yangilaymiz)
   const handleInc = (f) => {
-    const newOrgId = String(f?.organizationId ?? ""); // content ichidan keladi
-    if (isDifferentOrganizationInCart(cartItems, newOrgId)) {
+    const newOrgId = String(f?.organizationId ?? "");
+    const needClear = cartOrgRef.current && cartOrgRef.current !== newOrgId;
+
+    if (needClear) {
       clear();
       addNotification("Savatcha boshqa kateringga tegishli edi — tozalandi.", "info");
+      // Bir xil render ichida ikkinchi bosishda qayta toast chiqmasligi uchun
+      cartOrgRef.current = newOrgId;
     }
 
-    const key = getFoodKey(f);
     const prevQty = getQty(f);
+    const key = getFoodKey(f);
 
     add(
       {
@@ -173,8 +184,8 @@ export default function MenuFoods() {
         organizationId: f.organizationId,
         organizationName: f.organizationName || f.organization?.name || "",
         // tarixiy moslik uchun
-        cateringId,          // agar kerak bo‘lsa
-        id: f.id ?? null,    // agar backend yuborsa
+        cateringId,
+        id: f.id ?? null,
         menuId: f.menuId ?? null,
       },
       1
@@ -290,47 +301,47 @@ export default function MenuFoods() {
                       </button>
                     </div>
                   </div>
-
-                  {/* Modal */}
-                  {modalFood && (
-                    <div className="mf-modal-overlay">
-                      <div className="mf-modal" onClick={(e) => e.stopPropagation()}>
-                        <button className="mf-close" onClick={() => setModalFood(null)}>×</button>
-
-                        <div className="mf-img">
-                          <img src={getImgUrl(modalFood.attachmentUrl)} alt={modalFood.name} />
-                        </div>
-
-                        <h2 className="mf-title">{modalFood.name}</h2>
-                        <p className="mf-desc">{modalFood.description}</p>
-
-                        <div className="mf-bottom">
-                          <div className="mf-price">{fmtPrice(modalFood.price)}</div>
-
-                          <div className="mf-qty">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleDec(modalFood); }}
-                              disabled={getQty(modalFood) === 0}
-                            >
-                              −
-                            </button>
-
-                            <span>{getQty(modalFood)}</span>
-
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleInc(modalFood); }}
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </article>
               );
             })}
           </div>
+
+          {/* Modal — griddan tashqarida bitta render qilamiz; orqa fon bosilmaydi */}
+          {modalFood && (
+            <div className="mf-modal-overlay">
+              <div className="mf-modal" onClick={(e) => e.stopPropagation()}>
+                <button className="mf-close" onClick={() => setModalFood(null)}>×</button>
+
+                <div className="mf-img">
+                  <img src={getImgUrl(modalFood.attachmentUrl)} alt={modalFood.name} />
+                </div>
+
+                <h2 className="mf-title">{modalFood.name}</h2>
+                <p className="mf-desc">{modalFood.description}</p>
+
+                <div className="mf-bottom">
+                  <div className="mf-price">{fmtPrice(modalFood.price)}</div>
+
+                  <div className="mf-qty">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDec(modalFood); }}
+                      disabled={getQty(modalFood) === 0}
+                    >
+                      −
+                    </button>
+
+                    <span>{getQty(modalFood)}</span>
+
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleInc(modalFood); }}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Infinite scroll sentinel */}
           <div ref={loadMoreRef} style={{ height: 48 }} />
