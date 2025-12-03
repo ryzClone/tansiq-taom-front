@@ -113,12 +113,29 @@ export default function MenuFoods() {
   }, [API_BASE, cateringId, page, size]);
 
   // modal ochilganda body scrollni bloklash
-  useEffect(() => {
-    if (!modalFood) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
-  }, [modalFood]);
+ useEffect(() => {
+  if (!modalFood) return;
+
+  // Scroll’ni bloklash
+  const prev = document.body.style.overflow;
+  document.body.style.overflow = "hidden";
+
+  // Escape tugmasi listener
+  const handleEsc = (e) => {
+    if (e.key === "Escape") {
+      setModalFood(null);
+    }
+  };
+  window.addEventListener("keydown", handleEsc);
+
+  return () => {
+    // Scroll’ni tiklash
+    document.body.style.overflow = prev;
+    // Listener’ni o‘chirish
+    window.removeEventListener("keydown", handleEsc);
+  };
+}, [modalFood]);
+
 
   // IntersectionObserver — sentinel ko‘ringanda keyingi sahifa
   const hasMore = page + 1 < totalPages;
