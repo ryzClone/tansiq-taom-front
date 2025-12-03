@@ -184,11 +184,12 @@
 .food-foot{
   margin-top:auto;
   display:flex; 
-  flex-direction: column;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   gap:10px;
 }
 .food-price{
+  width: 40%;
   font-weight:700; color:var(--text-900);
 }
 .food-btn{
@@ -310,7 +311,7 @@
 .mf-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.0.1);
+  background: none;
   backdrop-filter: blur(1px);
   display: flex;
   align-items: center;

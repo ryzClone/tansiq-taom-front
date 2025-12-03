@@ -6,7 +6,7 @@ const fmt = (n) => `${Number(n||0).toLocaleString("uz-UZ")} so‘m`;
 
 export default function Cart() {
   const nav = useNavigate();
-  const { items, inc, dec, removeAllSame, clear, total } = useCart();
+  const { items, inc, dec, removeAllSame, clear, total } = useCart();  
 
   const partner =
     items?.find((x) => x.cateringName || x.organizationName || x.partnerName)
@@ -57,6 +57,7 @@ export default function Cart() {
                   </div>
 
                   <div className="cart-ctrls new-ctrls">
+
                     <div className="cart-ctrls-body">
                       <div className="qty qty-lg">
                         <button onClick={() => dec(it.key)}>−</button>
@@ -67,9 +68,11 @@ export default function Cart() {
                         O‘chirish
                       </button>
                     </div>
+
                     <div className="cart-price-row">
                       Narx: <strong>{fmt(lineTotal)}</strong>
                     </div>
+
                   </div>
                 </article>
               );

@@ -16,25 +16,37 @@ const getImgUrl = (attachmentUrl) => {
 };
 
 const fmtPrice = (n) => {
-  try {
-    return `${Number(n || 0).toLocaleString("uz-UZ")} so‘m`;
-  } catch {
-    return `${n} so‘m`;
-  }
+  try { return `${Number(n || 0).toLocaleString("uz-UZ")} so‘m`; }
+  catch { return `${n} so‘m`; }
+};
+
+// 🔑 Savatcha uchun barqaror key: orgId + (food.id bo‘lsa id, bo‘lmasa nom)
+const getFoodKey = (f) => {
+  const org = String(f?.organizationId ?? "");
+  const idOrName = f?.id != null ? String(f.id) : String(f?.name || "?");
+  return `org:${org}:${idOrName}`;
+};
+
+// 🧠 Cart ichida bor itemlar bir xil orgId’danmi?
+const isDifferentOrganizationInCart = (cartItems, newOrgIdLike) => {
+  const wanted = String(newOrgIdLike ?? "");
+  if (!cartItems?.length) return false;
+  // faqat organizationId (yoki eski ma'lumotlarda cateringId) ni solishtiramiz
+  return cartItems.some((it) => String(it.organizationId ?? it.cateringId ?? "") !== wanted);
 };
 
 export default function MenuFoods() {
   const navigate = useNavigate();
-  const { cateringId, menuId } = useParams();
+  const { cateringId } = useParams();   // backend list org bo‘yicha keladi
 
-  // 🔹 Cart va Notification
-  const { items: cartItems, add, inc, dec, remove, total } = useCart();
+  // Cart & Notification
+  const { items: cartItems, add, remove, clear, total } = useCart();
   const { addNotification } = useNotification();
 
-  // 🔹 Infinite scroll holati
+  // Infinite scroll holati
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(0);
-  const [size] = useState(9); // sahifadagi elementlar (UI’da ko‘rsatilmaydi)
+  const [size] = useState(9);
   const [totalPages, setTotalPages] = useState(1);
 
   const [loading, setLoading] = useState(false);
@@ -46,15 +58,15 @@ export default function MenuFoods() {
 
   const loadMoreRef = useRef(null);
 
-  // menuId o‘zgarsa listni tozalab, qayta startdan yuklaymiz
+  // cateringId o‘zgarsa listni tozalash
   useEffect(() => {
     setItems([]);
     setPage(0);
     setTotalPages(1);
     setErr("");
-  }, [menuId]);
+  }, [cateringId]);
 
-  // 🔻 To‘g‘ri endpoint: /food/by-menu/{menuId}
+  // To‘g‘ri endpoint: /food/by-organization/{cateringId}
   useEffect(() => {
     let cancelled = false;
     if (!cateringId) return;
@@ -66,20 +78,13 @@ export default function MenuFoods() {
         const params = new URLSearchParams();
         params.set("page", String(page));
         params.set("size", String(size));
-        // params.append("sort", "name,asc"); // kerak bo‘lsa
+        // params.append("sort", "name,asc");
 
-        const url = `${API_BASE}/food/by-organization/${String(
-          cateringId
-        )}?${params}`;
-        const res = await fetch(url, {
-          headers: { Accept: "application/json" },
-        });
+        const url = `${API_BASE}/food/by-organization/${String(cateringId)}?${params}`;
+        const res = await fetch(url, { headers: { Accept: "application/json" } });
         if (!res.ok) {
           let msg = `HTTP ${res.status}`;
-          try {
-            const j = await res.json();
-            if (j?.message) msg = j.message;
-          } catch {}
+          try { const j = await res.json(); if (j?.message) msg = j.message; } catch {}
           throw new Error(msg);
         }
 
@@ -87,7 +92,7 @@ export default function MenuFoods() {
         if (cancelled) return;
 
         const pageItems = Array.isArray(data?.content) ? data.content : [];
-        setItems((prev) => (page === 0 ? pageItems : [...prev, ...pageItems]));
+        setItems(prev => (page === 0 ? pageItems : [...prev, ...pageItems]));
         setTotalPages(Number(data?.page?.totalPages) || 1);
       } catch (e) {
         if (!cancelled) setErr(e?.message || "Yuklab bo‘lmadi");
@@ -97,20 +102,15 @@ export default function MenuFoods() {
     }
 
     load();
-    return () => {
-      cancelled = true;
-    };
-  }, [API_BASE, menuId, page, size]);
+    return () => { cancelled = true; };
+  }, [API_BASE, cateringId, page, size]);
 
   // modal ochilganda body scrollni bloklash
   useEffect(() => {
-    if (modalFood) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = prev;
-      };
-    }
+    if (!modalFood) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
   }, [modalFood]);
 
   // IntersectionObserver — sentinel ko‘ringanda keyingi sahifa
@@ -123,7 +123,7 @@ export default function MenuFoods() {
       (entries) => {
         const [entry] = entries;
         if (entry.isIntersecting && hasMore && !loading) {
-          setPage((p) => p + 1);
+          setPage(p => p + 1);
         }
       },
       { root: null, rootMargin: "200px", threshold: 0 }
@@ -144,17 +144,23 @@ export default function MenuFoods() {
     );
   }, [items, q]);
 
-  // Cart’dagi qty ni olish (key: menuId:name)
-  const getQty = (foodName) => {
-    const key = `${menuId}:${foodName}`;
+  // Cart’dagi qty ni olish (organizationId asosida key)
+  const getQty = (food) => {
+    const key = getFoodKey(food);
     const found = cartItems.find((x) => x.key === key);
     return found ? Number(found.qty || 0) : 0;
   };
 
-  // ++ tugma
+  // ++ tugma (agar cart boshqa org’dan bo‘lsa — avval tozalaymiz)
   const handleInc = (f) => {
-    const key = `${menuId}:${f.name}`;
-    const prevQty = getQty(f.name); // ✅ foodName yuboramiz
+    const newOrgId = String(f?.organizationId ?? ""); // content ichidan keladi
+    if (isDifferentOrganizationInCart(cartItems, newOrgId)) {
+      clear();
+      addNotification("Savatcha boshqa kateringga tegishli edi — tozalandi.", "info");
+    }
+
+    const key = getFoodKey(f);
+    const prevQty = getQty(f);
 
     add(
       {
@@ -163,8 +169,13 @@ export default function MenuFoods() {
         description: f.description,
         price: f.price,
         attachmentUrl: f.attachmentUrl,
-        menuId,
-        cateringId,
+        // identifikatsiya/partner info
+        organizationId: f.organizationId,
+        organizationName: f.organizationName || f.organization?.name || "",
+        // tarixiy moslik uchun
+        cateringId,          // agar kerak bo‘lsa
+        id: f.id ?? null,    // agar backend yuborsa
+        menuId: f.menuId ?? null,
       },
       1
     );
@@ -176,11 +187,11 @@ export default function MenuFoods() {
 
   // -- tugma
   const handleDec = (f) => {
-    const key = `${menuId}:${f.name}`;
-    const qty = getQty(f.name); // ✅ foodName yuboramiz
+    const key = getFoodKey(f);
+    const qty = getQty(f);
     if (qty <= 0) return;
 
-    remove(key, 1); // ✅ 1 ta kamaytiradi
+    remove(key, 1); // 1 ta kamaytiradi
     if (qty === 1) {
       addNotification(`“${f.name}” savatchadan olib tashlandi`, "info");
     }
@@ -190,7 +201,7 @@ export default function MenuFoods() {
 
   return (
     <div className="foods-page">
-      {/* TOP BAR: chapda “Menyular” , o‘rtada qidiruv, o‘ngda yashil korzinka tugma */}
+      {/* TOP BAR */}
       <div className="foods-toprow">
         <button
           className="back-btn back-btn--lg"
@@ -232,12 +243,13 @@ export default function MenuFoods() {
       ) : (
         <>
           <div className="foods-grid">
-            {shown.map((f, i) => {
+            {shown.map((f) => {
               const url = getImgUrl(f.attachmentUrl);
-              const qty = getQty(f.name);
+              const qty = getQty(f);
 
               return (
                 <article
+                  key={f.id ?? `${f.organizationId}-${f.name}-${f.price}`}
                   className="food-card"
                   onClick={() => !modalFood && setModalFood(f)}
                 >
@@ -252,35 +264,26 @@ export default function MenuFoods() {
                   </div>
 
                   <div className="food-body">
-                    <h3 className="food-name" title={f.name}>
-                      {f.name}
-                    </h3>
+                    <h3 className="food-name" title={f.name}>{f.name}</h3>
                     <p className="food-desc">{f.description}</p>
                   </div>
 
                   <div className="food-foot">
                     <div className="food-price">{fmtPrice(f.price)}</div>
 
-                    {/* UZUN YASHIL qty panel — sizning CSS bilan mos: qty-long */}
+                    {/* Uzun yashil qty panel */}
                     <div className="food-long">
                       <button
                         className="btn-minus"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDec(f);
-                        }}
+                        onClick={(e) => { e.stopPropagation(); handleDec(f); }}
                         aria-label="Kamaysin"
                       >
                         −
                       </button>
                       <div className="qty-val">{qty}</div>
-
                       <button
                         className="btn-plus"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleInc(f);
-                        }}
+                        onClick={(e) => { e.stopPropagation(); handleInc(f); }}
                         aria-label="Ko‘paytirish"
                       >
                         +
@@ -288,52 +291,34 @@ export default function MenuFoods() {
                     </div>
                   </div>
 
+                  {/* Modal */}
                   {modalFood && (
                     <div className="mf-modal-overlay">
-                      <div
-                        className="mf-modal"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          className="mf-close"
-                          onClick={() => setModalFood(null)}
-                        >
-                          ×
-                        </button>
+                      <div className="mf-modal" onClick={(e) => e.stopPropagation()}>
+                        <button className="mf-close" onClick={() => setModalFood(null)}>×</button>
 
                         <div className="mf-img">
-                          <img
-                            src={getImgUrl(modalFood.attachmentUrl)}
-                            alt={modalFood.name}
-                          />
+                          <img src={getImgUrl(modalFood.attachmentUrl)} alt={modalFood.name} />
                         </div>
 
                         <h2 className="mf-title">{modalFood.name}</h2>
                         <p className="mf-desc">{modalFood.description}</p>
 
                         <div className="mf-bottom">
-                          <div className="mf-price">
-                            {fmtPrice(modalFood.price)}
-                          </div>
+                          <div className="mf-price">{fmtPrice(modalFood.price)}</div>
 
                           <div className="mf-qty">
                             <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDec(modalFood);
-                              }}
-                              disabled={getQty(modalFood.name) === 0}
+                              onClick={(e) => { e.stopPropagation(); handleDec(modalFood); }}
+                              disabled={getQty(modalFood) === 0}
                             >
                               −
                             </button>
 
-                            <span>{getQty(modalFood.name)}</span>
+                            <span>{getQty(modalFood)}</span>
 
                             <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleInc(modalFood);
-                              }}
+                              onClick={(e) => { e.stopPropagation(); handleInc(modalFood); }}
                             >
                               +
                             </button>

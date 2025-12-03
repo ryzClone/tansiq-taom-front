@@ -179,6 +179,7 @@
 
 /* Narx pastda alohida blok */
 .cart-price-row {
+  width: 100%;
   margin-top: 6px;
   padding: 4px 8px;
   font-size: 15px;

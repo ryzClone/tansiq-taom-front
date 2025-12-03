@@ -16,6 +16,7 @@ export function CartProvider({ children }) {
   useEffect(() => {
     try {
       const arr = Array.from(map.entries());
+      
       localStorage.setItem("cart_v1", JSON.stringify(arr));
     } catch {}
   }, [map]);

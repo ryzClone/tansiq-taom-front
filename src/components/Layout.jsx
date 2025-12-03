@@ -3,6 +3,8 @@ import { Outlet, NavLink } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import "../styles/Layout.css";
 import { useCart } from "../context/CartContext";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 function readNotifCount() {
   try {
@@ -16,6 +18,7 @@ function readNotifCount() {
 export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
   const [notifCount, setNotifCount] = useState(0);
+    const navigate = useNavigate();
 
   // Cart kontekstdan jonli hisoblar
   const { count, total } = useCart();
@@ -58,33 +61,45 @@ export default function Layout() {
       <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
         <button
           type="button"
-          onClick={() => setCollapsed(v => !v)}
+          onClick={() => setCollapsed((v) => !v)}
           className="collapse-btn"
           title={collapsed ? "Kengaytirish" : "Yig'ish"}
           aria-expanded={!collapsed}
         >
-          {collapsed ? "›" : "‹"}
+          {collapsed ? (
+            <FaChevronRight size={18} />
+          ) : (
+            <FaChevronLeft size={18} />
+          )}
         </button>
 
-        <div className="brand">
-          <div className="brand-icon" />
-          {!collapsed && (
-            <div className="brand-text">
-              <div className="brand-title">Tansiq Taom</div>
-              <div className="brand-subtitle">Client</div>
-            </div>
-          )}
+<div 
+      className="brand"
+      onClick={() => navigate("/")}
+      style={{ cursor: "pointer" }}  // hover bo‘lsa qo‘l bo‘lib turishi uchun
+    >
+      <div className="brand-icon" />
+      {!collapsed && (
+        <div className="brand-text">
+          <div className="brand-title">Tansiq Taom</div>
+          <div className="brand-subtitle">Client</div>
         </div>
+      )}
+    </div>
 
         <nav className="nav">
-          {NAV.map(item => (
+          {NAV.map((item) => (
             <NavLink
               key={item.href}
               to={item.href}
               end={item.href === "/"}
               title={collapsed ? item.label : undefined}
               className={({ isActive }) =>
-                ["nav-link", collapsed ? "is-collapsed" : "", isActive ? "active" : ""].join(" ")
+                [
+                  "nav-link",
+                  collapsed ? "is-collapsed" : "",
+                  isActive ? "active" : "",
+                ].join(" ")
               }
             >
               <span className="active-indicator" />
@@ -92,21 +107,25 @@ export default function Layout() {
                 <span className="emoji">{item.emoji}</span>
 
                 {/* Collapsed holatda suzuvchi badge */}
-                {collapsed && typeof item.badge === "number" && item.badge > 0 && (
-                  <span className="badge-floating">
-                    {item.badge > 99 ? "99+" : item.badge}
-                  </span>
-                )}
+                {collapsed &&
+                  typeof item.badge === "number" &&
+                  item.badge > 0 && (
+                    <span className="badge-floating">
+                      {item.badge > 99 ? "99+" : item.badge}
+                    </span>
+                  )}
               </span>
 
               {!collapsed && <span className="label">{item.label}</span>}
 
               {/* Kengaygan holatda o‘ng tomonda badge */}
-              {!collapsed && typeof item.badge === "number" && item.badge > 0 && (
-                <span className="badge">
-                  {item.badge > 99 ? "99+" : item.badge}
-                </span>
-              )}
+              {!collapsed &&
+                typeof item.badge === "number" &&
+                item.badge > 0 && (
+                  <span className="badge">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </span>
+                )}
             </NavLink>
           ))}
         </nav>

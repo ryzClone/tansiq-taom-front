@@ -66,8 +66,11 @@
   background: var(--white);
   color: var(--emerald-700);
   border: 1px solid var(--emerald-200);
+  font-size: 20px !important;
   box-shadow: var(--shadow);
-  display: grid; place-items: center;
+  display: flex; 
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: background .2s ease, transform .2s ease, box-shadow .2s ease;
   z-index: 5;
